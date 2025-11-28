@@ -207,6 +207,14 @@ const PROJECTS = [
     image: "/images/benassi.png"
   },
   {
+    title: "Harold Perez Barber",
+    description: "Sitio web profesional para barbería. Diseño moderno y elegante con servicios premium.",
+    tech: ["Web Design", "Frontend", "Vercel"],
+    link: "https://haroldperez.vercel.app/",
+    color: "#FFD700",
+    image: "/images/harold.png"
+  },
+  {
     title: "KASAKIT SPA",
     description: "Plataforma para empresa de casas prefabricadas. Diseño, fabricación y construcción.",
     tech: ["Web Development", "Business", "Catalog"],
