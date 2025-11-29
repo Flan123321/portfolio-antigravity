@@ -250,7 +250,7 @@ const PROJECTS = [
 
 // --- UI COMPONENTS ---
 
-const Nav = () => {
+const Nav = ({ isDark, toggleTheme }) => {
   const [visible, setVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -261,37 +261,58 @@ const Nav = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${visible || menuOpen ? 'bg-black/90 backdrop-blur-md py-4' : 'py-6 bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${visible || menuOpen ? (isDark ? 'bg-black/90' : 'bg-white/90') + ' backdrop-blur-md py-4' : 'py-6 bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         <span className="text-xl font-bold tracking-widest uppercase bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
           Flavio C. Figueroa
         </span>
 
-        <div className="hidden md:flex gap-8 text-sm font-light tracking-wide">
+        <div className="hidden md:flex gap-8 text-sm font-light tracking-wide items-center">
           <a href="#about" className="hover:text-cyan-400 transition-colors">Sobre Mí</a>
           <a href="#skills" className="hover:text-cyan-400 transition-colors">Habilidades</a>
           <a href="#projects" className="hover:text-cyan-400 transition-colors">Proyectos</a>
           <a href="#contact" className="hover:text-cyan-400 transition-colors">Contacto</a>
+          <button
+            onClick={toggleTheme}
+            className="ml-4 p-2 rounded-full hover:bg-white/10 transition-all duration-300"
+            aria-label="Toggle theme"
+          >
+            {isDark ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+              </svg>
+            )}
+          </button>
         </div>
 
-        <button className="md:hidden text-white" onClick={() => setMenuOpen(!menuOpen)}>
+        <button className={`md:hidden ${isDark ? 'text-white' : 'text-black'}`} onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? '✕' : '☰'}
         </button>
       </div>
 
       {menuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-black/95 backdrop-blur-xl border-b border-white/10 py-8 flex flex-col items-center gap-6 text-lg font-light">
+        <div className={`md:hidden absolute top-full left-0 w-full ${isDark ? 'bg-black/95 border-white/10' : 'bg-white/95 border-black/10'} backdrop-blur-xl border-b py-8 flex flex-col items-center gap-6 text-lg font-light`}>
           <a href="#about" onClick={() => setMenuOpen(false)}>Sobre Mí</a>
           <a href="#skills" onClick={() => setMenuOpen(false)}>Habilidades</a>
           <a href="#projects" onClick={() => setMenuOpen(false)}>Proyectos</a>
           <a href="#contact" onClick={() => setMenuOpen(false)}>Contacto</a>
+          <button
+            onClick={() => { toggleTheme(); setMenuOpen(false); }}
+            className="mt-2 p-2 rounded-full hover:bg-black/10 transition-all duration-300 flex items-center gap-2"
+          >
+            {isDark ? '☀️ Modo Claro' : '🌙 Modo Oscuro'}
+          </button>
         </div>
       )}
     </nav>
   );
 };
 
-const Section = ({ id, title, children, className = "" }) => (
+const Section = ({ id, title, children, className = "", isDark }) => (
   <section id={id} className={`min-h-screen flex flex-col justify-center px-6 py-20 md:px-8 ${className}`}>
     <div className="max-w-5xl mx-auto w-full">
       {title && (
@@ -300,7 +321,10 @@ const Section = ({ id, title, children, className = "" }) => (
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-4xl md:text-7xl font-thin mb-12 md:mb-16 tracking-tighter bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent"
+          className={`text-4xl md:text-7xl font-thin mb-12 md:mb-16 tracking-tighter bg-gradient-to-r bg-clip-text text-transparent ${isDark
+              ? 'from-white to-gray-500'
+              : 'from-gray-900 via-gray-700 to-gray-500'
+            }`}
         >
           {title}
         </motion.h2>
@@ -311,9 +335,25 @@ const Section = ({ id, title, children, className = "" }) => (
 );
 
 export default function App() {
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : true;
+  });
+
+  const toggleTheme = () => {
+    setIsDark(prev => {
+      const newTheme = !prev;
+      localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+      return newTheme;
+    });
+  };
+
   return (
-    <div className="relative w-full bg-[#050505] text-white overflow-x-hidden selection:bg-cyan-500/30">
-      <Nav />
+    <div className={`relative w-full overflow-x-hidden transition-colors duration-500 ${isDark
+      ? 'bg-[#050505] text-white selection:bg-cyan-500/30'
+      : 'bg-gray-50 text-gray-900 selection:bg-cyan-200/50'
+      }`}>
+      <Nav isDark={isDark} toggleTheme={toggleTheme} />
 
       {/* 3D Background */}
       <div className="fixed top-0 left-0 w-full h-screen z-0">
@@ -324,9 +364,9 @@ export default function App() {
           dpr={1}
           raycaster={{ interval: 100 }} // Check hover only 10 times per second
         >
-          <color attach="background" args={['#050505']} />
+          <color attach="background" args={[isDark ? '#050505' : '#f9fafb']} />
           {/* Fog to hide distant objects */}
-          <fog attach="fog" args={['#050505', 5, 25]} />
+          <fog attach="fog" args={[isDark ? '#050505' : '#f9fafb', 5, 25]} />
 
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.3} penumbra={1} intensity={1} />
@@ -353,10 +393,13 @@ export default function App() {
             transition={{ duration: 1.5, ease: "easeOut" }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-9xl font-black tracking-tighter mix-blend-overlay opacity-80 leading-none">
+            <h1 className={`text-5xl md:text-9xl font-black tracking-tighter leading-none ${isDark
+                ? 'mix-blend-overlay opacity-80 text-white'
+                : 'text-gray-900 opacity-90'
+              }`}>
               FLAVIO<br />FIGUEROA
             </h1>
-            <p className="mt-6 text-lg md:text-2xl font-light tracking-widest text-cyan-300/80">
+            <p className={`mt-6 text-lg md:text-2xl font-light tracking-widest ${isDark ? 'text-cyan-300/80' : 'text-cyan-600/80'}`}>
               ESTUDIANTE DE INGENIERÍA CIVIL INFORMÁTICA
             </p>
           </motion.div>
@@ -367,27 +410,29 @@ export default function App() {
             transition={{ delay: 1, duration: 1 }}
             className="absolute bottom-12 flex flex-col items-center gap-2"
           >
-            <p className="text-xs uppercase tracking-[0.3em] opacity-50">Desplázate para Explorar</p>
-            <div className="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+            <p className={`text-xs uppercase tracking-[0.3em] opacity-50 ${isDark ? 'text-white' : 'text-black'}`}>Desplázate para Explorar</p>
+            <div className={`w-[1px] h-12 bg-gradient-to-b ${isDark ? 'from-white' : 'from-black'} to-transparent`}></div>
           </motion.div>
         </section>
 
         {/* About */}
-        <Section id="about" title="Sobre Mí" className="backdrop-blur-[2px]">
-          <div className="glass-panel p-8 md:p-12 rounded-2xl border border-white/10 relative overflow-hidden group">
+        <Section id="about" title="Sobre Mí" className="backdrop-blur-[2px]" isDark={isDark}>
+          <div className={`glass-panel p-8 md:p-12 rounded-2xl border relative overflow-hidden group ${isDark ? 'border-white/10' : 'border-gray-200 bg-white/50'
+            }`}>
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
 
-            <p className="text-lg md:text-2xl font-light leading-relaxed text-gray-300 relative z-10">
-              Soy <span className="text-white font-medium">Flavio C. Figueroa</span>, estudiante de Ingeniería Civil Informática apasionado por crear soluciones web impactantes.
+            <p className={`text-lg md:text-2xl font-light leading-relaxed relative z-10 ${isDark ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+              Soy <span className={isDark ? 'text-white font-medium' : 'text-black font-medium'}>Flavio C. Figueroa</span>, estudiante de Ingeniería Civil Informática apasionado por crear soluciones web impactantes.
               <br /><br />
-              Me dedico a construir <span className="text-cyan-400">aplicaciones web y proyectos</span> que resuelven problemas reales.
-              Me encanta <span className="text-purple-400">colaborar</span> con otros, compartir conocimiento y aprender constantemente nuevas tecnologías para expandir los límites de lo posible en la web.
+              Me dedico a construir <span className="text-cyan-600">aplicaciones web y proyectos</span> que resuelven problemas reales.
+              Me encanta <span className="text-purple-600">colaborar</span> con otros, compartir conocimiento y aprender constantemente nuevas tecnologías para expandir los límites de lo posible en la web.
             </p>
           </div>
         </Section>
 
         {/* Skills Section - The Neural Network will be visible here */}
-        <Section id="skills" title="Tecnologías y Habilidades" className="h-[100vh]">
+        <Section id="skills" title="Tecnologías y Habilidades" className="h-[100vh]" isDark={isDark}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {['Frontend', 'Backend', 'Base de Datos', 'DevOps', 'Nube', 'Herramientas', 'Gráficos', 'Core'].map((category, i) => (
               <motion.div
@@ -396,10 +441,11 @@ export default function App() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="glass-panel p-4 rounded-xl border border-white/10 text-center hover:border-cyan-500/30 transition-all duration-300"
+                className={`glass-panel p-4 rounded-xl border text-center hover:border-cyan-500/30 transition-all duration-300 ${isDark ? 'border-white/10' : 'border-gray-200 bg-white/50'
+                  }`}
               >
-                <span className="text-sm font-light text-gray-400">{category}</span>
-                <div className="mt-2 text-xs text-cyan-400">
+                <span className={`text-sm font-light ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{category}</span>
+                <div className={`mt-2 text-xs ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>
                   {SKILL_LIST.filter(s => s.category === category).length} habilidades
                 </div>
               </motion.div>
@@ -410,7 +456,7 @@ export default function App() {
         </Section>
 
         {/* Projects */}
-        <Section id="projects" title="Proyectos Seleccionados">
+        <Section id="projects" title="Proyectos Seleccionados" isDark={isDark}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {PROJECTS.map((project, i) => (
               <motion.a
@@ -422,7 +468,10 @@ export default function App() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ delay: i * 0.1 }}
-                className="group block bg-white/5 p-1 rounded-2xl hover:bg-white/10 transition-all duration-500 border border-white/5 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(0,255,255,0.1)]"
+                className={`group block p-1 rounded-2xl transition-all duration-500 border ${isDark
+                  ? 'bg-white/5 hover:bg-white/10 border-white/5 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(0,255,255,0.1)]'
+                  : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)]'
+                  }`}
               >
                 <div className="relative h-56 md:h-64 bg-gray-900 rounded-xl overflow-hidden mb-4">
                   <img
@@ -435,13 +484,16 @@ export default function App() {
                 </div>
 
                 <div className="p-4">
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">{project.title}</h3>
-                  <p className="text-gray-400 text-sm font-light mb-4 line-clamp-2">
+                  <h3 className={`text-xl md:text-2xl font-bold mb-2 group-hover:text-cyan-400 transition-colors ${isDark ? '' : 'text-gray-900'}`}>{project.title}</h3>
+                  <p className={`text-sm font-light mb-4 line-clamp-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     {project.description}
                   </p>
                   <div className="flex gap-2 flex-wrap">
                     {project.tech.map((t, j) => (
-                      <span key={j} className="text-[10px] uppercase tracking-wider px-2 py-1 bg-white/5 rounded border border-white/5 text-gray-400 group-hover:border-white/20 transition-colors">
+                      <span key={j} className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-colors ${isDark
+                        ? 'bg-white/5 border-white/5 text-gray-400 group-hover:border-white/20'
+                        : 'bg-gray-100 border-gray-300 text-gray-600 group-hover:border-gray-400'
+                        }`}>
                         {t}
                       </span>
                     ))}
@@ -453,12 +505,13 @@ export default function App() {
         </Section>
 
         {/* Contact */}
-        <Section id="contact" title="Contacto">
+        <Section id="contact" title="Contacto" isDark={isDark}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="glass-panel p-8 md:p-12 rounded-2xl border border-white/10 flex flex-col justify-between">
+            <div className={`glass-panel p-8 md:p-12 rounded-2xl border flex flex-col justify-between ${isDark ? 'border-white/10' : 'border-gray-200 bg-white/50'
+              }`}>
               <div>
-                <h3 className="text-3xl font-light mb-6">Colaboremos</h3>
-                <p className="text-gray-400 mb-8 font-light">
+                <h3 className={`text-3xl font-light mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>Colaboremos</h3>
+                <p className={`mb-8 font-light ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   Siempre estoy abierto a discutir nuevos proyectos, ideas creativas u oportunidades para ser parte de tus visiones.
                 </p>
               </div>
@@ -472,14 +525,20 @@ export default function App() {
                   name="email"
                   placeholder="Tu email"
                   required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-colors"
+                  className={`w-full px-4 py-3 border rounded-lg placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-colors ${isDark
+                    ? 'bg-white/5 border-white/10 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                 />
                 <textarea
                   name="message"
                   placeholder="Tu mensaje"
                   required
                   rows="4"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-colors resize-none"
+                  className={`w-full px-4 py-3 border rounded-lg placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-colors resize-none ${isDark
+                    ? 'bg-white/5 border-white/10 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                 ></textarea>
                 <button
                   type="submit"
@@ -512,15 +571,21 @@ export default function App() {
                 <a
                   key={i}
                   href={social.link}
-                  className="glass-panel p-6 rounded-xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-all duration-300 group"
+                  className={`glass-panel p-6 rounded-xl border flex items-center justify-between transition-all duration-300 group ${isDark
+                    ? 'border-white/10 hover:bg-white/10'
+                    : 'border-gray-200 bg-white/50 hover:bg-gray-50'
+                    }`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="text-gray-400 group-hover:text-cyan-400 transition-colors">
+                    <div className={`group-hover:text-cyan-400 transition-colors ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {social.icon}
                     </div>
                     <span className="text-xl font-light tracking-wide">{social.name}</span>
                   </div>
-                  <span className="text-xs px-3 py-1 bg-white/5 rounded-full text-gray-400 group-hover:bg-cyan-500/20 group-hover:text-cyan-300 transition-all">
+                  <span className={`text-xs px-3 py-1 rounded-full transition-all ${isDark
+                    ? 'bg-white/5 text-gray-400 group-hover:bg-cyan-500/20 group-hover:text-cyan-300'
+                    : 'bg-gray-100 text-gray-600 group-hover:bg-cyan-100 group-hover:text-cyan-700'
+                    }`}>
                     CONECTAR
                   </span>
                 </a>
@@ -529,7 +594,8 @@ export default function App() {
           </div>
         </Section>
 
-        <footer className="py-8 text-center text-xs text-gray-700 uppercase tracking-widest border-t border-white/5">
+        <footer className={`py-8 text-center text-xs uppercase tracking-widest border-t ${isDark ? 'text-gray-700 border-white/5' : 'text-gray-500 border-gray-200'
+          }`}>
           © 2025 Flavio C. Figueroa
         </footer>
 
