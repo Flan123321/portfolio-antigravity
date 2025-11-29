@@ -237,6 +237,14 @@ const PROJECTS = [
     link: "https://github.com/Flan123321/jotadrehhh",
     color: "#ff4757",
     image: "/images/jotadreh.png"
+  },
+  {
+    title: "Automatiz-Arte",
+    description: "Plataforma de automatización creativa con soluciones innovadoras.",
+    tech: ["React", "Automation", "Web Design"],
+    link: "https://automatiz-arte.vercel.app/",
+    color: "#9b59b6",
+    image: "/images/automatiz-arte.png"
   }
 ];
 
